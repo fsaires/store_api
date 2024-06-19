@@ -1,6 +1,6 @@
 def product_data():
     return {
-        "name": "Iphone 14 Pro Max",
+        "name": "Iphone 14 pro Max",
         "quantity": 10,
         "price": "8.500",
         "status": True,
@@ -19,3 +19,7 @@ def products_data():
             "status": False,
         },
     ]
+
+
+def product_data_errado():
+    return {"name": 10, "quantity": "10", "price": "8.500", "status": True}

@@ -1,7 +1,6 @@
 from typing import List
-
 import pytest
-from tests.factories import product_data
+from tests.factories import product_data, product_data_errado
 from fastapi import status
 
 
@@ -9,25 +8,28 @@ async def test_controller_create_should_return_success(client, products_url):
     response = await client.post(products_url, json=product_data())
 
     content = response.json()
-
+    del content["id"]
     del content["created_at"]
     del content["updated_at"]
-    del content["id"]
 
     assert response.status_code == status.HTTP_201_CREATED
     assert content == {
-        "name": "Iphone 14 Pro Max",
+        "name": "Iphone 14 pro Max",
         "quantity": 10,
         "price": "8.500",
         "status": True,
     }
 
 
+async def test_controller_create_should_return_not_inserted(client, products_url):
+    response = await client.post(products_url, json=product_data_errado())
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
 async def test_controller_get_should_return_success(
     client, products_url, product_inserted
 ):
     response = await client.get(f"{products_url}{product_inserted.id}")
-
     content = response.json()
 
     del content["created_at"]
@@ -36,7 +38,7 @@ async def test_controller_get_should_return_success(
     assert response.status_code == status.HTTP_200_OK
     assert content == {
         "id": str(product_inserted.id),
-        "name": "Iphone 14 Pro Max",
+        "name": "Iphone 14 pro Max",
         "quantity": 10,
         "price": "8.500",
         "status": True,
@@ -44,11 +46,11 @@ async def test_controller_get_should_return_success(
 
 
 async def test_controller_get_should_return_not_found(client, products_url):
-    response = await client.get(f"{products_url}4fd7cd35-a3a0-4c1f-a78d-d24aa81e7dca")
+    response = await client.get(f"{products_url}2a53ae4d-604a-465a-93b7-a9656da82039")
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {
-        "detail": "Product not found with filter: 4fd7cd35-a3a0-4c1f-a78d-d24aa81e7dca"
+        "detail": "Product not found with filter: 2a53ae4d-604a-465a-93b7-a9656da82039"
     }
 
 
@@ -76,10 +78,23 @@ async def test_controller_patch_should_return_success(
     assert response.status_code == status.HTTP_200_OK
     assert content == {
         "id": str(product_inserted.id),
-        "name": "Iphone 14 Pro Max",
+        "name": "Iphone 14 pro Max",
         "quantity": 10,
         "price": "7.500",
         "status": True,
+    }
+
+
+async def test_controller_patch_should_return_not_found(
+    client, products_url, product_inserted
+):
+    response = await client.patch(
+        f"{products_url}2a53ae4d-604a-465a-93b7-a9656da82039", json={"price": "7.500"}
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {
+        "detail": "Product not found with filter: 2a53ae4d-604a-465a-93b7-a9656da82039"
     }
 
 
@@ -93,10 +108,10 @@ async def test_controller_delete_should_return_no_content(
 
 async def test_controller_delete_should_return_not_found(client, products_url):
     response = await client.delete(
-        f"{products_url}4fd7cd35-a3a0-4c1f-a78d-d24aa81e7dca"
+        f"{products_url}2a53ae4d-604a-465a-93b7-a9656da82039"
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {
-        "detail": "Product not found with filter: 4fd7cd35-a3a0-4c1f-a78d-d24aa81e7dca"
+        "detail": "Product not found with filter: 2a53ae4d-604a-465a-93b7-a9656da82039"
     }

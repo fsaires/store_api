@@ -1,12 +1,13 @@
+from datetime import datetime
 from decimal import Decimal
 from typing import Annotated, Optional
 from bson import Decimal128
-from pydantic import AfterValidator, Field
 from store.schemas.base import BaseSchemaMixin, OutSchema
+from pydantic import AfterValidator, Field
 
 
 class ProductBase(BaseSchemaMixin):
-    name: str = Field(..., description="Product name")
+    name: str = Field(..., description="Product name")  # ... = campo obrigatório
     quantity: int = Field(..., description="Product quantity")
     price: Decimal = Field(..., description="Product price")
     status: bool = Field(..., description="Product status")
@@ -31,6 +32,9 @@ class ProductUpdate(BaseSchemaMixin):
     quantity: Optional[int] = Field(None, description="Product quantity")
     price: Optional[Decimal_] = Field(None, description="Product price")
     status: Optional[bool] = Field(None, description="Product status")
+    updated_at: Optional[datetime] = Field(
+        default_factory=datetime.utcnow, description="Product update time"
+    )
 
 
 class ProductUpdateOut(ProductOut):
